@@ -21,10 +21,10 @@ func TestEventDispatcher_should_process_any_job(t *testing.T) {
 	dispatcher.Run()
 	defer dispatcher.Stop()
 
-	testChan := make(chan int)
 	randWithSource := rand.NewSource(time.Now().UnixNano())
 	random := rand.New(randWithSource)
-	jobNumber := random.Intn(10)
+	jobNumber := random.Intn(10) + 1
+	testChan := make(chan int)
 
 	for i := 0; i < jobNumber; i++ {
 		jobFunc := func(currentNum int) func() {

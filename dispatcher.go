@@ -10,19 +10,18 @@ type Dispatcher struct {
 	queueChan  JobQueue
 
 	quit      chan bool
-	waitGroup *sync.WaitGroup
+	waitGroup sync.WaitGroup
+	mutex     sync.Mutex
 }
 
 func NewDispatcher(maxWorkers int, queueChan JobQueue) *Dispatcher {
-	var wg sync.WaitGroup
 	return &Dispatcher{
 		maxWorkers: maxWorkers,
 
 		workerPool: make(chan JobQueue, maxWorkers),
 		queueChan:  queueChan,
 
-		quit:      make(chan bool),
-		waitGroup: &wg,
+		quit: make(chan bool),
 	}
 }
 
@@ -49,6 +48,9 @@ func (d *Dispatcher) dispatch() {
 	for job := range d.queueChan {
 		// a job request has been received
 		go func(job Job) {
+			// we have to lock the workerPool, so it won't receive any data when still processing
+			d.mutex.Lock()
+			defer d.mutex.Unlock()
 			// try to obtain a worker job channel that is available.
 			// this will block until a worker is idle
 			jobChannel := <-d.workerPool

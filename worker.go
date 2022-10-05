@@ -7,17 +7,18 @@ type worker struct {
 }
 
 func newWorker(workerPool chan JobQueue) *worker {
+	jobChannel := make(JobQueue)
+	workerPool <- jobChannel
+
 	return &worker{
 		workerPool: workerPool,
-		jobChannel: make(JobQueue, 1),
+		jobChannel: jobChannel,
 	}
 }
 
 // start method starts the run loop for the worker,
 func (w *worker) start() {
 	go func() {
-		w.workerPool <- w.jobChannel
-
 		for job := range w.jobChannel {
 			// re-register the current worker into the worker queue.
 			// Freeing up the w.jobChannel
