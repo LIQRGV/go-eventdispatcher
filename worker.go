@@ -24,12 +24,7 @@ func (w *worker) start() {
 			// Freeing up the w.jobChannel
 			w.workerPool <- w.jobChannel
 
-			job.Handle()
+			job.handle()
 		}
 	}()
-}
-
-// stop signals the worker to stop listening for work requests.
-func (w *worker) stop() {
-	close(w.jobChannel) // workerPool closed on dispatcher already
 }

@@ -44,7 +44,7 @@ func NewJob(f func(), f2 ...func(byte []byte)) *Job {
 	}
 }
 
-func (j *Job) Handle() {
+func (j *Job) handle() {
 	defer func() {
 		if r := recover(); r != nil {
 			j.panicFunc(debug.Stack())

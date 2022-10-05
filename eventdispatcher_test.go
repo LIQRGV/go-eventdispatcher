@@ -75,12 +75,23 @@ func TestEventDispatcher_should_not_quit_upon_panic(t *testing.T) {
 	dispatcher.Run()
 	defer dispatcher.Stop()
 
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+
 	jobFunc := func() {
+		cancel() // this is odd but works
 		panic("me panic!!!")
 	}
 	jobQueue <- *eventdispatcher.NewJob(jobFunc)
 
-	assert.True(t, true, "process should finished despite panic happened")
+	<-ctx.Done()
+
+	switch ctx.Err() {
+	case context.DeadlineExceeded:
+		assert.Fail(t, "Context Deadline Exceeded before execution done")
+
+	case context.Canceled:
+		assert.True(t, true, "process should finished despite panic happened")
+	}
 }
 
 func TestJobQueue_able_to_make_unbuffered_queue(t *testing.T) {
