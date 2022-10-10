@@ -33,7 +33,7 @@ func TestEventDispatcher_should_process_any_job(t *testing.T) {
 			}
 		}(i)
 
-		jobQueue <- *eventdispatcher.NewJob(jobFunc)
+		jobQueue <- eventdispatcher.NewDefaultJob(jobFunc)
 	}
 
 	testCounter := 0
@@ -81,7 +81,7 @@ func TestEventDispatcher_should_not_quit_upon_panic(t *testing.T) {
 		cancel() // this is odd but works
 		panic("me panic!!!")
 	}
-	jobQueue <- *eventdispatcher.NewJob(jobFunc)
+	jobQueue <- eventdispatcher.NewDefaultJob(jobFunc)
 
 	<-ctx.Done()
 
@@ -100,7 +100,7 @@ func TestJobQueue_able_to_make_unbuffered_queue(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 
 	go func() {
-		jobQueue <- *eventdispatcher.NewJob(func() {})
+		jobQueue <- eventdispatcher.NewDefaultJob(func() {})
 
 		assert.Fail(t, "This line should unreachable")
 		cancel()
@@ -138,7 +138,7 @@ func TestJobQueue_able_to_receive_custom_panicFunc(t *testing.T) {
 		cancel()
 	}
 
-	jobQueue <- *eventdispatcher.NewJob(func() {
+	jobQueue <- eventdispatcher.NewDefaultJob(func() {
 		panic("me panic!!!")
 	}, panicFunc)
 
@@ -167,7 +167,7 @@ func TestJobQueue_unable_to_receive_more_than_1_custom_panicFunc(t *testing.T) {
 		assert.True(t, recoverFlag, "Panic-Recover should triggered")
 	}()
 
-	jobQueue <- *eventdispatcher.NewJob(func() {
+	jobQueue <- eventdispatcher.NewDefaultJob(func() {
 		panic("me panic!!!")
 	}, panicFunc, panicFunc)
 }

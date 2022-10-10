@@ -16,8 +16,12 @@ func NewJobQueue(maxQueue int) JobQueue {
 	return make(JobQueue)
 }
 
-// Job represents the job to be run
-type Job struct {
+type Job interface {
+	Handle()
+}
+
+// DefaultJob represents the job to be run
+type DefaultJob struct {
 	function  func()
 	panicFunc func(byte []byte)
 }
@@ -27,7 +31,7 @@ func defaultPanicFunc(byte []byte) {
 	defaultLog.Print(string(byte))
 }
 
-func NewJob(f func(), f2 ...func(byte []byte)) *Job {
+func NewDefaultJob(f func(), f2 ...func(byte []byte)) *DefaultJob {
 	panicFunc := defaultPanicFunc
 
 	if len(f2) > 1 {
@@ -38,13 +42,13 @@ func NewJob(f func(), f2 ...func(byte []byte)) *Job {
 		panicFunc = f2[0]
 	}
 
-	return &Job{
+	return &DefaultJob{
 		function:  f,
 		panicFunc: panicFunc,
 	}
 }
 
-func (j *Job) handle() {
+func (j *DefaultJob) Handle() {
 	defer func() {
 		if r := recover(); r != nil {
 			j.panicFunc(debug.Stack())

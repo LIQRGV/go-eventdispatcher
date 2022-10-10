@@ -24,7 +24,7 @@ func (w *worker) start() {
 			// Freeing up the w.jobChannel
 			w.workerPool <- w.jobChannel
 
-			job.handle()
+			job.Handle()
 		}
 	}()
 }
